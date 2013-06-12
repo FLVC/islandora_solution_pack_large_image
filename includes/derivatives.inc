@@ -18,52 +18,44 @@
  * @return boolean
  *   TRUE if all derivatives were created successfully, FALSE otherwise.
  */
-
 function islandora_large_image_create_all_derivatives(AbstractObject $object, $force = TRUE) {
   if (!isset($object['OBJ'])) {
     drupal_set_message(t('Could not create image derivatives for %s. No image file was uploaded.', array('%s' => $object->id)), 'error');
     return FALSE;
   }
-
   $base_name = str_replace(':', '-', $object->id);
   $uploaded_file = islandora_large_image_get_uploaded_file($object, $base_name);
 
-  if (! $uploaded_file)
+  if (! $uploaded_file) {
     return FALSE;
+  }
 
   $mime_type = $object['OBJ']->mimeType;
+
+  $ob = FALSE;
 
   if ($mime_type == 'image/tiff' or  $mime_type == 'image/tif'  ) {
     $ob  = TRUE;
     $jp2 = islandora_large_image_create_JP2_derivative($object, $uploaded_file, $base_name, $force);
   }
 
-  if ( $mime_type == 'image/jp2' or $mime_type == 'application/octet-stream' ) {
+  // FLCV additions - if a jp2 is supplied, we use it and derive a TIFF - which
+  // is generally unused, but we don't know if that will always be true....
+  //
+  // NOTE: drupal's mimeType code currently incorrectly identifies it as a an octet-stream, hopefully to be fixed soon...
 
-    $jp2 = islandora_large_image_add_datastream($object, 'JP2', $uploaded_file, 'image/jp2', t('Original JPEG 2000 "' . $object['OBJ']->label . '"'), TRUE);
+  if ($mime_type == 'image/jp2' or $mime_type == 'application/octet-stream') {
+    $jp2 = islandora_large_image_add_datastream($object, 'JP2', $uploaded_file, 'image/jp2', t('Original JPEG 2000 ' . $object['OBJ']->label));
     $ob  = islandora_large_image_replace_obj_datastream($object, $uploaded_file);
-
   }
+
+  // FLVC - these are always derived for both cases above
 
   $jpg = islandora_large_image_create_JPG_derivative($object, $uploaded_file, $base_name, $force);
   $tn = islandora_large_image_create_TN_derivative($object, $uploaded_file, $base_name, $force);
+  return $ob &&$jp2 && $jpg && $tn && file_unmanaged_delete($uploaded_file);
 
-  return $ob && $jp2 && $jpg && $tn && file_unmanaged_delete($uploaded_file);
 }
-
-
-/**
- * Replaces the OBJ datastream with a TIFF, derived from the uploaded JP2
- *
- * @param FedoraObject $object
- *  The object to fetch the uploaded image file from.
- * @param string $original_jp2
- *  The filepath to the original jp2k from which we'll derive a tiff
- *
- * @return boolean
- *   TRUE if successful, FALSE otherwise.
- */
-
 
 function islandora_large_image_replace_obj_datastream(AbstractFedoraObject $object, $original_jp2) {
 
@@ -95,7 +87,6 @@ function islandora_large_image_replace_obj_datastream(AbstractFedoraObject $obje
 
   return file_unmanaged_delete($derivative_file);
 }
-
 
 
 /**
@@ -161,19 +152,7 @@ function islandora_large_image_create_JP2_derivative(AbstractObject $object, $up
     islandora_large_image_add_datastream($object, 'JP2', $derivative_file, 'image/jp2', t('JPEG 2000'));
     return file_unmanaged_delete($derivative_file);
   }
-<<<<<<< HEAD
-  if (!$kakadu) {
-    $derivative_file = islandora_large_image_imagemagick_convert($uploaded_file, "temporary://{$base_name}_JP2.jp2", islandora_large_image_get_args());
-  }
-  if ($derivative_file === FALSE) {
-    drupal_set_message(t('Failed to create JP2 derivative'), 'error');
-    return FALSE;
-  }
-  islandora_large_image_add_datastream($object, 'JP2', $derivative_file, 'image/jp2', t('JPEG 2000 derived from original TIFF'));
-  return file_unmanaged_delete($derivative_file);
-=======
   return TRUE;
->>>>>>> upstream/7.x
 }
 
 /**
@@ -405,7 +384,6 @@ function islandora_large_image_get_args() {
     $args[] = "-define jp2:cblkheight=64";
     $args[] = "-define jp2:sop";
   }
-
   return $args;
 }
 
