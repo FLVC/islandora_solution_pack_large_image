@@ -18,6 +18,7 @@
  * @return bool
  *   TRUE if all derivatives were created successfully, FALSE otherwise.
  */
+/*  COMMENTING OUT RANDY'S CHANGES - IF WE KEEP THIS LOGIC, IT WILL HAVE TO MOVE TO THE JP2 FUNCTION
 function islandora_large_image_create_all_derivatives(AbstractObject $object, $force = TRUE) {
   if (!isset($object['OBJ'])) {
     drupal_set_message(t('Could not create image derivatives for %s. No image file was uploaded.', array('%s' => $object->id)), 'error');
@@ -87,7 +88,7 @@ function islandora_large_image_replace_obj_datastream(AbstractFedoraObject $obje
 
   return file_unmanaged_delete($derivative_file);
 }
-
+*/
 
 /**
  * Fetches the upload image file from Fedora, and saves it to a temp location.
@@ -548,9 +549,9 @@ function islandora_large_image_create_all_derivatives(AbstractObject $object, $f
   $base_name = str_replace(':', '-', $object->id);
   $uploaded_file = islandora_large_image_get_uploaded_file($object, $base_name);
   if ($uploaded_file) {
-    $jp2 = islandora_large_image_create_JP2_derivative($object, $uploaded_file, $base_name, $force);
-    $jpg = islandora_large_image_create_JPG_derivative($object, $uploaded_file, $base_name, $force);
-    $tn = islandora_large_image_create_TN_derivative($object, $uploaded_file, $base_name, $force);
+    $jp2 = islandora_large_image_create_jp2_derivative($object, $uploaded_file, $base_name, $force);
+    $jpg = islandora_large_image_create_jpg_derivative($object, $uploaded_file, $base_name, $force);
+    $tn = islandora_large_image_create_tn_derivative($object, $uploaded_file, $base_name, $force);
     return $jp2 && $jpg && $tn && file_unmanaged_delete($uploaded_file);
   }
   return FALSE;
