@@ -76,7 +76,7 @@ function islandora_large_image_replace_obj_datastream(AbstractFedoraObject $obje
   $ds = $object->constructDatastream('OBJ', 'M');
   $ds->label = 'Reduced TIFF Derived from original JPEG 2000 Image';
   $ds->mimeType = 'image/tiff';
-  $ds->versionable = FALSE;
+  $ds->versionable = TRUE;
   $ds->setContentFromFile($dest);
 
   try {
