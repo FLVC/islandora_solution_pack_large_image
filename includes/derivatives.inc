@@ -57,7 +57,7 @@ function islandora_large_image_create_all_derivatives(AbstractObject $object, $f
   return $ob &&$jp2 && $jpg && $tn && file_unmanaged_delete($uploaded_file);
 
 }
-
+*/
 function islandora_large_image_replace_obj_datastream(AbstractFedoraObject $object, $original_jp2) {
 
   if (! $object->purgeDatastream('OBJ')) {
@@ -88,7 +88,6 @@ function islandora_large_image_replace_obj_datastream(AbstractFedoraObject $obje
 
   return file_unmanaged_delete($derivative_file);
 }
-*/
 
 /**
  * Fetches the upload image file from Fedora, and saves it to a temp location.
@@ -128,6 +127,35 @@ function islandora_large_image_create_jp2_derivative(AbstractObject $object, $fo
       'messages' => array(),
     );
     $uploaded_file = islandora_large_image_get_uploaded_file($object);
+
+    // FLCV additions - if a jp2 is supplied, we use it and derive a TIFF - which
+    // is generally unused, but we don't know if that will always be true....
+    //
+    // NOTE: drupal's mimeType code currently incorrectly identifies it as a an octet-stream, hopefully to be fixed soon...
+    $mime_type = $object['OBJ']->mimeType;
+    if ($mime_type == 'image/jp2' or $mime_type == 'application/octet-stream') {
+      $jp2 = islandora_large_image_add_datastream($object, 'JP2', $uploaded_file, 'image/jp2', t('Original JPEG 2000 ' . $object['OBJ']->label));
+      if ($jp2 === TRUE) {
+        $to_return['messages'][] = array(
+          'message' => t('Created JP2 derivative.'),
+          'type' => 'dsm',
+          'severity' => 'status',
+        );
+        $ob  = islandora_large_image_replace_obj_datastream($object, $uploaded_file);
+        if ($ob === TRUE) {
+          $to_return['success'] = TRUE;
+        }
+        else {
+          $to_return['messages'][] = array(
+            'message' => t('Failed to replace JP2 with TIFF in OBJ datastream.'),
+            'type' => 'dsm',
+            'severity' => WATCHDOG_ERROR,
+          );
+        }
+      }
+      file_unmanaged_delete($uploaded_file);
+      return $to_return;
+    }
 
     // Create JP2 with kakadu.
     module_load_include('inc', 'islandora_large_image', 'includes/utilities');
@@ -549,9 +577,10 @@ function islandora_large_image_create_all_derivatives(AbstractObject $object, $f
   $base_name = str_replace(':', '-', $object->id);
   $uploaded_file = islandora_large_image_get_uploaded_file($object, $base_name);
   if ($uploaded_file) {
-    $jp2 = islandora_large_image_create_jp2_derivative($object, $uploaded_file, $base_name, $force);
+    //$jp2 = islandora_large_image_create_jp2_derivative($object, $uploaded_file, $base_name, $force);  make jp2 creation last
     $jpg = islandora_large_image_create_jpg_derivative($object, $uploaded_file, $base_name, $force);
     $tn = islandora_large_image_create_tn_derivative($object, $uploaded_file, $base_name, $force);
+    $jp2 = islandora_large_image_create_jp2_derivative($object, $uploaded_file, $base_name, $force);
     return $jp2 && $jpg && $tn && file_unmanaged_delete($uploaded_file);
   }
   return FALSE;
