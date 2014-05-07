@@ -19,12 +19,17 @@
     <form MIME="image/jpg"/>
   </dsTypeModel>
   <dsTypeModel ID="JP2" ORDERED="false">
+    <form MIME="image/jp2"/>
     <form MIME="image/jpg"/>
   </dsTypeModel>
   <dsTypeModel ID="OBJ">
     <form MIME="image/tiff"/>
+    <form MIME="image/jp2"/>
   </dsTypeModel>
   <dsTypeModel ID="TECHMD">
+    <form MIME="text/xml"/>
+  </dsTypeModel>
+  <dsTypeModel ID="ORIG_METADATA">
     <form MIME="text/xml"/>
   </dsTypeModel>
 </dsCompositeModel>
