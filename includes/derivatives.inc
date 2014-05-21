@@ -319,7 +319,7 @@ function islandora_large_image_kdu_expand($src, $dest, $args = NULL) {
  *   The destination file path if successful otherwise FALSE.
  */
 function islandora_large_image_imagemagick_convert($src, $dest, $args) {
-  $src = drupal_realpath($src) . '[0]';
+  $src = drupal_realpath($src);
   $dest = drupal_realpath($dest);
   $context = array(
     'source' => $src,
