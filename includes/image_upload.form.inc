@@ -18,12 +18,8 @@
  */
 function islandora_large_image_image_upload_form(array $form, array &$form_state) {
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
-<<<<<<< HEAD
   $extensions = array('tiff tif jp2 jpg2');
-=======
-  $extensions = array('tiff tif jp2');
   $upload_required = variable_get('islandora_require_obj_upload', TRUE);
->>>>>>> upstream/7.x-1.8
   return array(
     'file' => array(
       '#title' => t('Image'),
